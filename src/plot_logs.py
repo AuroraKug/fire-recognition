@@ -98,11 +98,11 @@ def _plot_curve(
     # 绘制曲线
     # Train 使用深蓝色 带圆点标记
     ax.plot(epochs, train_vals, label="Train", color='#2878B5', 
-            linewidth=2.5, marker='o', markersize=6, linestyle='-')
+            linewidth=2.5, linestyle='-')
     
     # Val 使用橙红色 带方块标记
     ax.plot(epochs, val_vals, label="Validation", color='#C82423', 
-            linewidth=2.5, marker='s', markersize=6, linestyle='--')
+            linewidth=2.5, linestyle='-')
 
     # 关键修复 强制X轴为整数
     ax.xaxis.set_major_locator(MaxNLocator(integer=True))

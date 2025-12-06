@@ -9,7 +9,7 @@ from torchvision import transforms
 from tqdm import tqdm
 
 from dataset import LABEL_TO_INDEX
-from models.model_v2 import build_model
+from models.model_v3 import build_model
 
 
 def build_inference_transform(image_size: int = 320) -> transforms.Compose:
@@ -126,13 +126,20 @@ def main() -> None:
     state = torch.load(args.checkpoint, map_location=device)
     model.load_state_dict(state)
 
+    model.eval()
     predictions: List[int] = []
     for path in tqdm(image_paths, desc="Inference", leave=False):
         with path.open("rb") as f:
             img = Image.open(f).convert("RGB")
-        tensor = transform(img).unsqueeze(0)
-        pred_label = predict(model, tensor, device)
-        predictions.append(pred_label)
+        hflip_img = img.transpose(Image.FLIP_LEFT_RIGHT)
+        t1 = transform(img).unsqueeze(0)
+        t2 = transform(hflip_img).unsqueeze(0)
+        with torch.no_grad():
+            outputs1 = model(t1.to(device))
+            outputs2 = model(t2.to(device))
+            logits = (outputs1 + outputs2) / 2.0
+            pred_label = logits.argmax(dim=1).item()
+        predictions.append(int(pred_label))
 
     if args.output:
         output_path = Path(args.output)

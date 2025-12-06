@@ -1,6 +1,7 @@
 import math
 from pathlib import Path
 from typing import Tuple
+from multiprocessing import cpu_count
 
 import torch
 from torch import nn, optim
@@ -10,7 +11,7 @@ from tqdm import tqdm
 from datetime import datetime
 
 from dataset import FireDataset, LABEL_TO_INDEX, scan_dataset
-from models.model_v2 import build_model
+from models.model_v3 import build_model
 from torch.cuda import amp
 from torch.nn.utils import clip_grad_norm_
 from torch.utils.tensorboard import SummaryWriter
@@ -29,12 +30,12 @@ def build_transforms(image_size: int = 320) -> Tuple[transforms.Compose, transfo
     std = [0.5, 0.5, 0.5]
     train_transforms = transforms.Compose(
         [
-            transforms.RandomResizedCrop(size=image_size, scale=(0.7, 1.0)),
-            transforms.ColorJitter(brightness=0.25, contrast=0.25, saturation=0.25, hue=0.02),
+            transforms.RandomResizedCrop(size=image_size, scale=(0.85, 1.0)),
             transforms.RandomHorizontalFlip(p=0.5),
-            transforms.RandomAffine(degrees=8, translate=(0.1, 0.1)),
+            transforms.ColorJitter(brightness=0.15, contrast=0.15, saturation=0.15, hue=0.02),
             transforms.ToTensor(),
             transforms.Normalize(mean=mean, std=std),
+            transforms.RandomErasing(p=0.1, scale=(0.02, 0.2), ratio=(0.3, 3.3)),
         ]
     )
     val_transforms = transforms.Compose(
@@ -87,19 +88,26 @@ def create_dataloaders(
     train_dataset = FireDataset(train_paths, train_labels, transform=train_transforms)
     val_dataset = FireDataset(val_paths, val_labels, transform=val_transforms)
 
+    pin_device = "cuda" if torch.cuda.is_available() else "cpu"
     train_loader = DataLoader(
         train_dataset,
         batch_size=batch_size,
         shuffle=True,
         num_workers=num_workers,
-        pin_memory=torch.cuda.is_available(),
+        pin_memory=True,
+        pin_memory_device=pin_device,
+        persistent_workers=True,
+        prefetch_factor=4,
     )
     val_loader = DataLoader(
         val_dataset,
         batch_size=batch_size,
         shuffle=False,
         num_workers=num_workers,
-        pin_memory=torch.cuda.is_available(),
+        pin_memory=True,
+        pin_memory_device=pin_device,
+        persistent_workers=True,
+        prefetch_factor=4,
     )
     return train_loader, val_loader
 
@@ -225,11 +233,15 @@ def main() -> None:
 
     num_classes = len(LABEL_TO_INDEX)
     image_size = 320
-    batch_size = 32
-    num_epochs = 120
+    batch_size = 64
+    num_epochs = 150
     val_ratio = 0.2
-    num_workers = 4
-    learning_rate = 0.003
+    try:
+        num_workers = min(16, cpu_count())
+    except Exception:
+        num_workers = 8
+    print(f"Using num_workers={num_workers}")
+    learning_rate = 0.005
     momentum = 0.9
     weight_decay = 3e-4
     checkpoint_dir = Path(__file__).resolve().parent / "checkpoints"
@@ -256,15 +268,9 @@ def main() -> None:
         model = build_model(num_classes=num_classes)
     model = model.to(device)
 
-    criterion = nn.CrossEntropyLoss(label_smoothing=0.05)
+    criterion = nn.CrossEntropyLoss(label_smoothing=0.02)
     optimizer = optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum, weight_decay=weight_decay)
-    warmup_epochs = 10
-    def lr_lambda(epoch: int) -> float:
-        if epoch < warmup_epochs:
-            return float(epoch + 1) / float(warmup_epochs)
-        progress = (epoch - warmup_epochs) / max(1, num_epochs - warmup_epochs)
-        return 0.5 * (1.0 + math.cos(math.pi * progress))
-    scheduler = optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=lr_lambda)
+    scheduler = optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, T_0=15, T_mult=2)
     scaler = amp.GradScaler(enabled=device.type == "cuda")
 
     best_val_acc = 0.0
@@ -301,6 +307,7 @@ def main() -> None:
             if val_acc > best_val_acc:
                 best_val_acc = val_acc
                 save_checkpoint(model, checkpoint_dir / "best.pth")
+            print(f"Early-stopping monitor (log only): best_val_acc={best_val_acc:.4f}")
     writer.close()
 
 
