@@ -10,7 +10,7 @@ from tqdm import tqdm
 from datetime import datetime
 
 from dataset import FireDataset, LABEL_TO_INDEX, scan_dataset
-from models.model_v1 import build_model
+from models.model_v2 import build_model
 from torch.cuda import amp
 from torch.nn.utils import clip_grad_norm_
 from torch.utils.tensorboard import SummaryWriter
@@ -30,13 +30,9 @@ def build_transforms(image_size: int = 320) -> Tuple[transforms.Compose, transfo
     train_transforms = transforms.Compose(
         [
             transforms.RandomResizedCrop(size=image_size, scale=(0.7, 1.0)),
-            transforms.RandomPerspective(distortion_scale=0.3, p=0.2),
-            transforms.ColorJitter(brightness=0.35, contrast=0.35, saturation=0.35, hue=0.04),
+            transforms.ColorJitter(brightness=0.25, contrast=0.25, saturation=0.25, hue=0.02),
             transforms.RandomHorizontalFlip(p=0.5),
-            transforms.RandomVerticalFlip(p=0.1),
-            transforms.RandomRotation(10),
-            transforms.RandomAffine(10, translate=(0.1, 0.1)),
-            transforms.RandAugment(num_ops=2, magnitude=7),
+            transforms.RandomAffine(degrees=8, translate=(0.1, 0.1)),
             transforms.ToTensor(),
             transforms.Normalize(mean=mean, std=std),
         ]
@@ -233,7 +229,7 @@ def main() -> None:
     num_epochs = 120
     val_ratio = 0.2
     num_workers = 4
-    learning_rate = 0.01
+    learning_rate = 0.003
     momentum = 0.9
     weight_decay = 3e-4
     checkpoint_dir = Path(__file__).resolve().parent / "checkpoints"
@@ -262,7 +258,7 @@ def main() -> None:
 
     criterion = nn.CrossEntropyLoss(label_smoothing=0.05)
     optimizer = optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum, weight_decay=weight_decay)
-    warmup_epochs = 5
+    warmup_epochs = 10
     def lr_lambda(epoch: int) -> float:
         if epoch < warmup_epochs:
             return float(epoch + 1) / float(warmup_epochs)

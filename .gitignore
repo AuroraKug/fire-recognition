@@ -1,3 +1,7 @@
 /dataset/
 __pycache__/
 /src/outputs/
+/src/checkpoints/
+/src/logs/
+/src/figures/
+.DS_Store

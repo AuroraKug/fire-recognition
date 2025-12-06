@@ -6,9 +6,10 @@ from typing import List, Sequence
 import torch
 from PIL import Image
 from torchvision import transforms
+from tqdm import tqdm
 
 from dataset import LABEL_TO_INDEX
-from models.model_v1 import build_model
+from models.model_v2 import build_model
 
 
 def build_inference_transform(image_size: int = 320) -> transforms.Compose:
@@ -126,7 +127,7 @@ def main() -> None:
     model.load_state_dict(state)
 
     predictions: List[int] = []
-    for path in image_paths:
+    for path in tqdm(image_paths, desc="Inference", leave=False):
         with path.open("rb") as f:
             img = Image.open(f).convert("RGB")
         tensor = transform(img).unsqueeze(0)
