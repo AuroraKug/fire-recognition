@@ -11,7 +11,7 @@ from dataset import LABEL_TO_INDEX
 from models.model_v1 import build_model
 
 
-def build_inference_transform(image_size: int = 224) -> transforms.Compose:
+def build_inference_transform(image_size: int = 320) -> transforms.Compose:
     '''
     Description
         构建推理阶段的transform 与验证阶段保持一致
@@ -56,6 +56,7 @@ def load_images(root_dir: Path) -> List[Path]:
         for path in sorted(root_dir.glob("*")):
             if path.is_file() and path.suffix.lower() in exts:
                 image_paths.append(path)
+    image_paths = sorted(image_paths, key=lambda p: str(p))
     return image_paths
 
 
@@ -106,7 +107,7 @@ def main() -> None:
     '''
     parser = ArgumentParser()
     parser.add_argument("--checkpoint", type=str, required=True, help="checkpoint path")
-    parser.add_argument("--image_size", type=int, default=224, help="input image size")
+    parser.add_argument("--image_size", type=int, default=320, help="input image size")
     parser.add_argument("--data_root", type=str, default=str(Path(__file__).resolve().parent.parent / "dataset" / "TestData"), help="TestData root directory")
     parser.add_argument("--output", type=str, default=None, help="output csv path")
     args = parser.parse_args()

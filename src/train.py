@@ -1,3 +1,4 @@
+import math
 from pathlib import Path
 from typing import Tuple
 
@@ -9,9 +10,11 @@ from tqdm import tqdm
 
 from dataset import FireDataset, LABEL_TO_INDEX, scan_dataset
 from models.model_v1 import build_model
+from torch.cuda import amp
+from torch.nn.utils import clip_grad_norm_
 
 
-def build_transforms(image_size: int = 224) -> Tuple[transforms.Compose, transforms.Compose]:
+def build_transforms(image_size: int = 320) -> Tuple[transforms.Compose, transforms.Compose]:
     '''
     Description
         构建训练与验证阶段的transforms
@@ -24,10 +27,14 @@ def build_transforms(image_size: int = 224) -> Tuple[transforms.Compose, transfo
     std = [0.5, 0.5, 0.5]
     train_transforms = transforms.Compose(
         [
-            transforms.Resize((image_size, image_size)),
-            transforms.RandomHorizontalFlip(),
-            transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.02),
-            transforms.RandomRotation(15),
+            transforms.RandomResizedCrop(size=image_size, scale=(0.7, 1.0)),
+            transforms.RandomPerspective(distortion_scale=0.3, p=0.2),
+            transforms.ColorJitter(brightness=0.35, contrast=0.35, saturation=0.35, hue=0.04),
+            transforms.RandomHorizontalFlip(p=0.5),
+            transforms.RandomVerticalFlip(p=0.1),
+            transforms.RandomRotation(10),
+            transforms.RandomAffine(10, translate=(0.1, 0.1)),
+            transforms.RandAugment(num_ops=2, magnitude=7),
             transforms.ToTensor(),
             transforms.Normalize(mean=mean, std=std),
         ]
@@ -105,6 +112,8 @@ def train_one_epoch(
     criterion: nn.Module,
     optimizer: optim.Optimizer,
     device: torch.device,
+    scaler: amp.GradScaler,
+    clip_norm: float = 5.0,
 ) -> Tuple[float, float]:
     '''
     Description
@@ -115,6 +124,8 @@ def train_one_epoch(
         criterion (nn.Module): 损失函数
         optimizer (optim.Optimizer): 优化器
         device (torch.device): 计算设备
+        scaler (amp.GradScaler): 混合精度缩放器
+        clip_norm (float): 梯度裁剪阈值
     Returns
         metrics (Tuple): 平均loss与accuracy
     '''
@@ -128,10 +139,15 @@ def train_one_epoch(
         targets = targets.to(device)
 
         optimizer.zero_grad()
-        outputs = model(images)
-        loss = criterion(outputs, targets)
-        loss.backward()
-        optimizer.step()
+        with amp.autocast(enabled=device.type == "cuda"):
+            outputs = model(images)
+            loss = criterion(outputs, targets)
+        scaler.scale(loss).backward()
+        scaler.unscale_(optimizer)
+        if clip_norm is not None and clip_norm > 0:
+            clip_grad_norm_(model.parameters(), max_norm=clip_norm)
+        scaler.step(optimizer)
+        scaler.update()
 
         running_loss += loss.item() * images.size(0)
         preds = outputs.argmax(dim=1)
@@ -169,8 +185,9 @@ def validate(
         for images, targets in tqdm(dataloader, desc="Validate", leave=False):
             images = images.to(device)
             targets = targets.to(device)
-            outputs = model(images)
-            loss = criterion(outputs, targets)
+            with amp.autocast(enabled=device.type == "cuda"):
+                outputs = model(images)
+                loss = criterion(outputs, targets)
 
             running_loss += loss.item() * images.size(0)
             preds = outputs.argmax(dim=1)
@@ -209,12 +226,14 @@ def main() -> None:
     base_dir = Path(__file__).resolve().parent.parent / "dataset"
 
     num_classes = len(LABEL_TO_INDEX)
-    image_size = 224
+    image_size = 320
     batch_size = 32
-    num_epochs = 20
+    num_epochs = 120
     val_ratio = 0.2
     num_workers = 4
-    learning_rate = 1e-3
+    learning_rate = 0.01
+    momentum = 0.9
+    weight_decay = 3e-4
     checkpoint_dir = Path(__file__).resolve().parent / "checkpoints"
 
     train_transforms, val_transforms = build_transforms(image_size=image_size)
@@ -233,14 +252,21 @@ def main() -> None:
         model = build_model(num_classes=num_classes)
     model = model.to(device)
 
-    criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=learning_rate)
-    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
+    criterion = nn.CrossEntropyLoss(label_smoothing=0.05)
+    optimizer = optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum, weight_decay=weight_decay)
+    warmup_epochs = 5
+    def lr_lambda(epoch: int) -> float:
+        if epoch < warmup_epochs:
+            return float(epoch + 1) / float(warmup_epochs)
+        progress = (epoch - warmup_epochs) / max(1, num_epochs - warmup_epochs)
+        return 0.5 * (1.0 + math.cos(math.pi * progress))
+    scheduler = optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=lr_lambda)
+    scaler = amp.GradScaler(enabled=device.type == "cuda")
 
     best_val_acc = 0.0
 
     for epoch in range(num_epochs):
-        train_loss, train_acc = train_one_epoch(model, train_loader, criterion, optimizer, device)
+        train_loss, train_acc = train_one_epoch(model, train_loader, criterion, optimizer, device, scaler)
         val_loss, val_acc = validate(model, val_loader, criterion, device)
         scheduler.step()
 
