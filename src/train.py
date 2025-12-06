@@ -11,7 +11,7 @@ from tqdm import tqdm
 from datetime import datetime
 
 from dataset import FireDataset, LABEL_TO_INDEX, scan_dataset
-from models.model_v4 import build_model
+from models.model_v5 import build_model
 from torch.nn.utils import clip_grad_norm_
 from torch.utils.tensorboard import SummaryWriter
 
@@ -240,8 +240,8 @@ def main() -> None:
     except Exception:
         num_workers = 8
     print(f"Using num_workers={num_workers}")
-    learning_rate = 0.0025
-    weight_decay = 3e-4
+    learning_rate = 0.0032
+    weight_decay = 2e-4
     checkpoint_dir = Path(__file__).resolve().parent / "checkpoints"
     log_dir = Path(__file__).resolve().parent / "logs"
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -266,9 +266,9 @@ def main() -> None:
         model = build_model(num_classes=num_classes)
     model = model.to(device)
 
-    criterion = nn.CrossEntropyLoss(label_smoothing=0.02)
+    criterion = nn.CrossEntropyLoss(label_smoothing=0.03)
     optimizer = optim.AdamW(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
-    scheduler = optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, T_0=15, T_mult=2)
+    scheduler = optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, T_0=20, T_mult=2)
     scaler = torch.amp.GradScaler(enabled=device.type == "cuda")
 
     best_val_acc = 0.0
