@@ -9,7 +9,7 @@ from torchvision import transforms
 from tqdm import tqdm
 
 from dataset import LABEL_TO_INDEX
-from models.model_v3 import build_model
+from models.model_v4 import build_model
 
 
 def build_inference_transform(image_size: int = 320) -> transforms.Compose:

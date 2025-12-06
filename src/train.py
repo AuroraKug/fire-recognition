@@ -11,8 +11,7 @@ from tqdm import tqdm
 from datetime import datetime
 
 from dataset import FireDataset, LABEL_TO_INDEX, scan_dataset
-from models.model_v3 import build_model
-from torch.cuda import amp
+from models.model_v4 import build_model
 from torch.nn.utils import clip_grad_norm_
 from torch.utils.tensorboard import SummaryWriter
 
@@ -118,7 +117,7 @@ def train_one_epoch(
     criterion: nn.Module,
     optimizer: optim.Optimizer,
     device: torch.device,
-    scaler: amp.GradScaler,
+    scaler: torch.amp.GradScaler,
     clip_norm: float = 5.0,
 ) -> Tuple[float, float]:
     '''
@@ -130,7 +129,7 @@ def train_one_epoch(
         criterion (nn.Module): 损失函数
         optimizer (optim.Optimizer): 优化器
         device (torch.device): 计算设备
-        scaler (amp.GradScaler): 混合精度缩放器
+        scaler (torch.amp.GradScaler): 混合精度缩放器
         clip_norm (float): 梯度裁剪阈值
     Returns
         metrics (Tuple): 平均loss与accuracy
@@ -145,7 +144,7 @@ def train_one_epoch(
         targets = targets.to(device)
 
         optimizer.zero_grad()
-        with amp.autocast(enabled=device.type == "cuda"):
+        with torch.amp.autocast(device_type=device.type if device.type in {"cuda", "cpu"} else "cuda", enabled=device.type == "cuda"):
             outputs = model(images)
             loss = criterion(outputs, targets)
         scaler.scale(loss).backward()
@@ -191,7 +190,7 @@ def validate(
         for images, targets in tqdm(dataloader, desc="Validate", leave=False):
             images = images.to(device)
             targets = targets.to(device)
-            with amp.autocast(enabled=device.type == "cuda"):
+            with torch.amp.autocast(device_type=device.type if device.type in {"cuda", "cpu"} else "cuda", enabled=device.type == "cuda"):
                 outputs = model(images)
                 loss = criterion(outputs, targets)
 
@@ -241,8 +240,7 @@ def main() -> None:
     except Exception:
         num_workers = 8
     print(f"Using num_workers={num_workers}")
-    learning_rate = 0.005
-    momentum = 0.9
+    learning_rate = 0.0025
     weight_decay = 3e-4
     checkpoint_dir = Path(__file__).resolve().parent / "checkpoints"
     log_dir = Path(__file__).resolve().parent / "logs"
@@ -269,9 +267,9 @@ def main() -> None:
     model = model.to(device)
 
     criterion = nn.CrossEntropyLoss(label_smoothing=0.02)
-    optimizer = optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum, weight_decay=weight_decay)
+    optimizer = optim.AdamW(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
     scheduler = optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, T_0=15, T_mult=2)
-    scaler = amp.GradScaler(enabled=device.type == "cuda")
+    scaler = torch.amp.GradScaler(enabled=device.type == "cuda")
 
     best_val_acc = 0.0
 
