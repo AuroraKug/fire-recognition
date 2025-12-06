@@ -7,11 +7,13 @@ from torch import nn, optim
 from torch.utils.data import DataLoader
 from torchvision import transforms
 from tqdm import tqdm
+from datetime import datetime
 
 from dataset import FireDataset, LABEL_TO_INDEX, scan_dataset
 from models.model_v1 import build_model
 from torch.cuda import amp
 from torch.nn.utils import clip_grad_norm_
+from torch.utils.tensorboard import SummaryWriter
 
 
 def build_transforms(image_size: int = 320) -> Tuple[transforms.Compose, transforms.Compose]:
@@ -235,6 +237,12 @@ def main() -> None:
     momentum = 0.9
     weight_decay = 3e-4
     checkpoint_dir = Path(__file__).resolve().parent / "checkpoints"
+    log_dir = Path(__file__).resolve().parent / "logs"
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    tb_dir = log_dir / "tensorboard" / f"tb_{timestamp}"
+    txt_log_path = log_dir / f"training_log_{timestamp}.txt"
+    log_dir.mkdir(parents=True, exist_ok=True)
+    tb_dir.mkdir(parents=True, exist_ok=True)
 
     train_transforms, val_transforms = build_transforms(image_size=image_size)
     train_loader, val_loader = create_dataloaders(
@@ -265,21 +273,39 @@ def main() -> None:
 
     best_val_acc = 0.0
 
-    for epoch in range(num_epochs):
-        train_loss, train_acc = train_one_epoch(model, train_loader, criterion, optimizer, device, scaler)
-        val_loss, val_acc = validate(model, val_loader, criterion, device)
-        scheduler.step()
+    writer = SummaryWriter(log_dir=tb_dir)
+    with txt_log_path.open("w", encoding="utf-8") as log_f:
+        for epoch in range(num_epochs):
+            train_loss, train_acc = train_one_epoch(model, train_loader, criterion, optimizer, device, scaler)
+            val_loss, val_acc = validate(model, val_loader, criterion, device)
+            current_lr = optimizer.param_groups[0]["lr"]
+            scheduler.step()
 
-        print(
-            f"Epoch {epoch + 1}/{num_epochs} "
-            f"Train Loss: {train_loss:.4f} Acc: {train_acc:.4f} "
-            f"Val Loss: {val_loss:.4f} Acc: {val_acc:.4f}"
-        )
+            print(
+                f"Epoch {epoch + 1}/{num_epochs} "
+                f"Train Loss: {train_loss:.4f} Acc: {train_acc:.4f} "
+                f"Val Loss: {val_loss:.4f} Acc: {val_acc:.4f} "
+                f"LR: {current_lr:.6f}"
+            )
 
-        save_checkpoint(model, checkpoint_dir / "last.pth")
-        if val_acc > best_val_acc:
-            best_val_acc = val_acc
-            save_checkpoint(model, checkpoint_dir / "best.pth")
+            log_line = (
+                f"Epoch {epoch + 1} "
+                f"TrainLoss {train_loss:.4f} TrainAcc {train_acc:.4f} "
+                f"ValLoss {val_loss:.4f} ValAcc {val_acc:.4f} "
+                f"LR {current_lr:.6f}"
+            )
+            log_f.write(log_line + "\n")
+            writer.add_scalar("Loss/train", train_loss, epoch + 1)
+            writer.add_scalar("Loss/val", val_loss, epoch + 1)
+            writer.add_scalar("Acc/train", train_acc, epoch + 1)
+            writer.add_scalar("Acc/val", val_acc, epoch + 1)
+            writer.add_scalar("LR", current_lr, epoch + 1)
+
+            save_checkpoint(model, checkpoint_dir / "last.pth")
+            if val_acc > best_val_acc:
+                best_val_acc = val_acc
+                save_checkpoint(model, checkpoint_dir / "best.pth")
+    writer.close()
 
 
 if __name__ == "__main__":
