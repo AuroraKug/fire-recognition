@@ -1,0 +1,324 @@
+root@autodl-container-c56d46a775-765ba7b1:~/pj# python train.py \
+  --train_root datasets/train --val_root datasets/val \
+  --output_dir models_v5_incept_ce_plateau224 \
+  --epochs 90 --batch_size 16 \
+  --learning_rate 2e-4 \
+  --model_type inception \
+  --lr_schedule plateau \
+  --no_mixup \
+  --img_size 224 \
+  --l2_weight 1e-4 \
+  --patience 18
+2025-12-07 10:21:12.633060: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2025-12-07 10:21:12.684754: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2025-12-07 10:21:13.819240: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+Building image index...
+Found classes: ['fire', 'no_fire', 'start_fire']
+Using separate validation set...
+Training samples: 2890
+Validation samples: 225
+Class weights: {0: 1.0, 1: 1.1007499649951815, 2: 1.4280110945908333}
+Found 2890 validated image filenames belonging to 3 classes.
+Found 225 validated image filenames belonging to 3 classes.
+Creating model...
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1765074075.404292  833226 gpu_device.cc:2020] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 22324 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3090, pci bus id: 0000:57:00.0, compute capability: 8.6
+Starting training...
+Epoch 1/90
+2025-12-07 10:21:33.379950: I external/local_xla/xla/service/service.cc:163] XLA service 0x7fb7b0002d80 initialized for platform CUDA (this does not guarantee that XLA will be used). Devices:
+2025-12-07 10:21:33.380022: I external/local_xla/xla/service/service.cc:171]   StreamExecutor device (0): NVIDIA GeForce RTX 3090, Compute Capability 8.6
+2025-12-07 10:21:33.977153: I tensorflow/compiler/mlir/tensorflow/utils/dump_mlir_util.cc:269] disabling MLIR crash reproducer, set env var `MLIR_CRASH_REPRODUCER_DIRECTORY` to enable.
+2025-12-07 10:21:36.781133: I external/local_xla/xla/stream_executor/cuda/cuda_dnn.cc:473] Loaded cuDNN version 91600
+I0000 00:00:1765074117.624624  833519 device_compiler.h:196] Compiled cluster using XLA!  This line is logged at most once for the lifetime of the process.
+ 38/181 ━━━━━━━━━━━━━━━━━━━━ 38s 267ms/step - accuracy: 0.6750 - loss: 1.40962025-12-07 10:22:12.241374: I external/local_xla/xla/stream_executor/cuda/subprocess_compilation.cc:346] ptxas warning : Registers are spilled to local memory in function 'gemm_fusion_dot_14735', 4 bytes spill stores, 4 bytes spill loads
+
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 390ms/step - accuracy: 0.7776 - loss: 1.2610  
+Epoch 1: val_accuracy improved from None to 0.36444, saving model to models_v5_incept_ce_plateau224/best_model.keras
+181/181 ━━━━━━━━━━━━━━━━━━━━ 126s 478ms/step - accuracy: 0.8273 - loss: 1.1813 - val_accuracy: 0.3644 - val_loss: 2.5205 - learning_rate: 2.0000e-04
+Epoch 2/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 271ms/step - accuracy: 0.9263 - loss: 0.9419  
+Epoch 7: val_accuracy improved from 0.71556 to 0.76889, saving model to models_v5_incept_ce_plateau224/best_model.keras
+181/181 ━━━━━━━━━━━━━━━━━━━━ 51s 282ms/step - accuracy: 0.9180 - loss: 0.9602 - val_accuracy: 0.7689 - val_loss: 1.2907 - learning_rate: 2.0000e-04
+Epoch 8/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 264ms/step - accuracy: 0.9215 - loss: 0.9635  
+Epoch 8: val_accuracy did not improve from 0.76889
+181/181 ━━━━━━━━━━━━━━━━━━━━ 50s 273ms/step - accuracy: 0.9256 - loss: 0.9418 - val_accuracy: 0.7467 - val_loss: 1.2759 - learning_rate: 2.0000e-04
+Epoch 9/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 267ms/step - accuracy: 0.9216 - loss: 0.9483 
+Epoch 9: val_accuracy did not improve from 0.76889
+181/181 ━━━━━━━━━━━━━━━━━━━━ 50s 276ms/step - accuracy: 0.9208 - loss: 0.9526 - val_accuracy: 0.7333 - val_loss: 1.3065 - learning_rate: 2.0000e-04
+Epoch 10/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 261ms/step - accuracy: 0.9256 - loss: 0.9302  
+Epoch 10: val_accuracy improved from 0.76889 to 0.78222, saving model to models_v5_incept_ce_plateau224/best_model.keras
+181/181 ━━━━━━━━━━━━━━━━━━━━ 49s 273ms/step - accuracy: 0.9273 - loss: 0.9254 - val_accuracy: 0.7822 - val_loss: 1.1893 - learning_rate: 2.0000e-04
+Epoch 11/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 268ms/step - accuracy: 0.9321 - loss: 0.8959  
+Epoch 11: val_accuracy improved from 0.78222 to 0.78667, saving model to models_v5_incept_ce_plateau224/best_model.keras
+181/181 ━━━━━━━━━━━━━━━━━━━━ 51s 279ms/step - accuracy: 0.9253 - loss: 0.9044 - val_accuracy: 0.7867 - val_loss: 1.2603 - learning_rate: 2.0000e-04
+Epoch 12/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 262ms/step - accuracy: 0.9390 - loss: 0.8666  
+Epoch 12: val_accuracy did not improve from 0.78667
+181/181 ━━━━━━━━━━━━━━━━━━━━ 49s 270ms/step - accuracy: 0.9349 - loss: 0.8813 - val_accuracy: 0.7644 - val_loss: 1.3049 - learning_rate: 2.0000e-04
+Epoch 13/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 269ms/step - accuracy: 0.9351 - loss: 0.8744 
+Epoch 13: val_accuracy improved from 0.78667 to 0.79556, saving model to models_v5_incept_ce_plateau224/best_model.keras
+181/181 ━━━━━━━━━━━━━━━━━━━━ 51s 280ms/step - accuracy: 0.9329 - loss: 0.8825 - val_accuracy: 0.7956 - val_loss: 1.1475 - learning_rate: 2.0000e-04
+Epoch 14/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 263ms/step - accuracy: 0.9364 - loss: 0.8591  
+Epoch 14: val_accuracy did not improve from 0.79556
+181/181 ━━━━━━━━━━━━━━━━━━━━ 49s 271ms/step - accuracy: 0.9384 - loss: 0.8578 - val_accuracy: 0.7956 - val_loss: 1.1334 - learning_rate: 2.0000e-04
+Epoch 15/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 262ms/step - accuracy: 0.9342 - loss: 0.8687  
+Epoch 15: val_accuracy did not improve from 0.79556
+181/181 ━━━━━━━━━━━━━━━━━━━━ 49s 271ms/step - accuracy: 0.9353 - loss: 0.8580 - val_accuracy: 0.7911 - val_loss: 1.1086 - learning_rate: 2.0000e-04
+Epoch 16/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 263ms/step - accuracy: 0.9356 - loss: 0.8450  
+Epoch 16: val_accuracy did not improve from 0.79556
+181/181 ━━━━━━━━━━━━━━━━━━━━ 49s 271ms/step - accuracy: 0.9318 - loss: 0.8595 - val_accuracy: 0.7689 - val_loss: 1.2423 - learning_rate: 2.0000e-04
+Epoch 17/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 258ms/step - accuracy: 0.9338 - loss: 0.8586  
+Epoch 17: val_accuracy did not improve from 0.79556
+181/181 ━━━━━━━━━━━━━━━━━━━━ 48s 266ms/step - accuracy: 0.9356 - loss: 0.8459 - val_accuracy: 0.7822 - val_loss: 1.1012 - learning_rate: 2.0000e-04
+Epoch 18/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 264ms/step - accuracy: 0.9403 - loss: 0.8252  
+Epoch 18: val_accuracy did not improve from 0.79556
+181/181 ━━━━━━━━━━━━━━━━━━━━ 49s 272ms/step - accuracy: 0.9329 - loss: 0.8350 - val_accuracy: 0.7600 - val_loss: 1.1915 - learning_rate: 2.0000e-04
+Epoch 19/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 264ms/step - accuracy: 0.9338 - loss: 0.8252 
+Epoch 19: val_accuracy did not improve from 0.79556
+181/181 ━━━━━━━━━━━━━━━━━━━━ 49s 272ms/step - accuracy: 0.9394 - loss: 0.8171 - val_accuracy: 0.7200 - val_loss: 1.2657 - learning_rate: 2.0000e-04
+Epoch 20/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 262ms/step - accuracy: 0.9449 - loss: 0.7895 
+Epoch 20: val_accuracy did not improve from 0.79556
+181/181 ━━━━━━━━━━━━━━━━━━━━ 49s 270ms/step - accuracy: 0.9415 - loss: 0.7970 - val_accuracy: 0.7956 - val_loss: 1.1875 - learning_rate: 2.0000e-04
+Epoch 21/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 265ms/step - accuracy: 0.9373 - loss: 0.7962  
+Epoch 21: val_accuracy did not improve from 0.79556
+181/181 ━━━━━━━━━━━━━━━━━━━━ 50s 274ms/step - accuracy: 0.9356 - loss: 0.8013 - val_accuracy: 0.7867 - val_loss: 1.0780 - learning_rate: 2.0000e-04
+Epoch 22/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 264ms/step - accuracy: 0.9405 - loss: 0.7915  
+Epoch 22: val_accuracy did not improve from 0.79556
+181/181 ━━━━━━━━━━━━━━━━━━━━ 50s 273ms/step - accuracy: 0.9450 - loss: 0.7756 - val_accuracy: 0.7689 - val_loss: 1.1411 - learning_rate: 2.0000e-04
+Epoch 23/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 264ms/step - accuracy: 0.9517 - loss: 0.7543 
+Epoch 23: val_accuracy did not improve from 0.79556
+181/181 ━━━━━━━━━━━━━━━━━━━━ 50s 273ms/step - accuracy: 0.9481 - loss: 0.7606 - val_accuracy: 0.7556 - val_loss: 1.0764 - learning_rate: 2.0000e-04
+Epoch 24/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 261ms/step - accuracy: 0.9439 - loss: 0.7565  
+Epoch 24: val_accuracy did not improve from 0.79556
+181/181 ━━━━━━━━━━━━━━━━━━━━ 49s 270ms/step - accuracy: 0.9464 - loss: 0.7471 - val_accuracy: 0.7867 - val_loss: 1.0343 - learning_rate: 2.0000e-04
+Epoch 25/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 261ms/step - accuracy: 0.9445 - loss: 0.7491  
+Epoch 25: val_accuracy did not improve from 0.79556
+181/181 ━━━━━━━━━━━━━━━━━━━━ 49s 269ms/step - accuracy: 0.9426 - loss: 0.7533 - val_accuracy: 0.7600 - val_loss: 1.1223 - learning_rate: 2.0000e-04
+Epoch 26/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 263ms/step - accuracy: 0.9516 - loss: 0.7214 
+Epoch 26: val_accuracy improved from 0.79556 to 0.80000, saving model to models_v5_incept_ce_plateau224/best_model.keras
+181/181 ━━━━━━━━━━━━━━━━━━━━ 50s 274ms/step - accuracy: 0.9464 - loss: 0.7290 - val_accuracy: 0.8000 - val_loss: 1.0292 - learning_rate: 2.0000e-04
+Epoch 27/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 259ms/step - accuracy: 0.9424 - loss: 0.7287  
+Epoch 27: val_accuracy did not improve from 0.80000
+181/181 ━━━━━━━━━━━━━━━━━━━━ 48s 267ms/step - accuracy: 0.9439 - loss: 0.7248 - val_accuracy: 0.7778 - val_loss: 1.0681 - learning_rate: 2.0000e-04
+Epoch 28/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 260ms/step - accuracy: 0.9503 - loss: 0.7124  
+Epoch 28: val_accuracy did not improve from 0.80000
+181/181 ━━━━━━━━━━━━━━━━━━━━ 49s 269ms/step - accuracy: 0.9554 - loss: 0.6947 - val_accuracy: 0.7467 - val_loss: 1.1943 - learning_rate: 2.0000e-04
+Epoch 29/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 260ms/step - accuracy: 0.9530 - loss: 0.6821 
+Epoch 29: val_accuracy did not improve from 0.80000
+181/181 ━━━━━━━━━━━━━━━━━━━━ 49s 269ms/step - accuracy: 0.9460 - loss: 0.7013 - val_accuracy: 0.7600 - val_loss: 1.1241 - learning_rate: 2.0000e-04
+Epoch 30/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 260ms/step - accuracy: 0.9442 - loss: 0.6928  
+Epoch 30: val_accuracy did not improve from 0.80000
+181/181 ━━━━━━━━━━━━━━━━━━━━ 49s 268ms/step - accuracy: 0.9460 - loss: 0.6826 - val_accuracy: 0.7822 - val_loss: 1.0988 - learning_rate: 2.0000e-04
+Epoch 31/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 263ms/step - accuracy: 0.9581 - loss: 0.6717 
+Epoch 31: val_accuracy did not improve from 0.80000
+181/181 ━━━━━━━━━━━━━━━━━━━━ 49s 271ms/step - accuracy: 0.9526 - loss: 0.6713 - val_accuracy: 0.8000 - val_loss: 1.0438 - learning_rate: 2.0000e-04
+Epoch 32/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 259ms/step - accuracy: 0.9612 - loss: 0.6544  
+Epoch 32: val_accuracy improved from 0.80000 to 0.80444, saving model to models_v5_incept_ce_plateau224/best_model.keras
+181/181 ━━━━━━━━━━━━━━━━━━━━ 49s 271ms/step - accuracy: 0.9561 - loss: 0.6556 - val_accuracy: 0.8044 - val_loss: 1.0045 - learning_rate: 2.0000e-04
+Epoch 33/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 261ms/step - accuracy: 0.9473 - loss: 0.6692  
+Epoch 33: val_accuracy did not improve from 0.80444
+181/181 ━━━━━━━━━━━━━━━━━━━━ 49s 269ms/step - accuracy: 0.9495 - loss: 0.6616 - val_accuracy: 0.7778 - val_loss: 1.0153 - learning_rate: 2.0000e-04
+Epoch 34/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 265ms/step - accuracy: 0.9455 - loss: 0.6675 
+Epoch 34: val_accuracy did not improve from 0.80444
+181/181 ━━━━━━━━━━━━━━━━━━━━ 50s 273ms/step - accuracy: 0.9467 - loss: 0.6568 - val_accuracy: 0.7244 - val_loss: 1.1564 - learning_rate: 2.0000e-04
+Epoch 35/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 261ms/step - accuracy: 0.9623 - loss: 0.6264 
+Epoch 35: val_accuracy improved from 0.80444 to 0.81778, saving model to models_v5_incept_ce_plateau224/best_model.keras
+181/181 ━━━━━━━━━━━━━━━━━━━━ 49s 273ms/step - accuracy: 0.9612 - loss: 0.6250 - val_accuracy: 0.8178 - val_loss: 0.9106 - learning_rate: 2.0000e-04
+Epoch 36/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 259ms/step - accuracy: 0.9608 - loss: 0.6081  
+Epoch 36: val_accuracy did not improve from 0.81778
+181/181 ━━━━━━━━━━━━━━━━━━━━ 49s 268ms/step - accuracy: 0.9585 - loss: 0.6127 - val_accuracy: 0.7956 - val_loss: 0.9375 - learning_rate: 2.0000e-04
+Epoch 37/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 262ms/step - accuracy: 0.9623 - loss: 0.6086 
+Epoch 37: val_accuracy did not improve from 0.81778
+181/181 ━━━━━━━━━━━━━━━━━━━━ 49s 271ms/step - accuracy: 0.9606 - loss: 0.6076 - val_accuracy: 0.7822 - val_loss: 0.9431 - learning_rate: 2.0000e-04
+Epoch 38/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 261ms/step - accuracy: 0.9627 - loss: 0.5892  
+Epoch 38: val_accuracy did not improve from 0.81778
+181/181 ━━━━━━━━━━━━━━━━━━━━ 49s 269ms/step - accuracy: 0.9585 - loss: 0.6040 - val_accuracy: 0.7467 - val_loss: 1.0204 - learning_rate: 2.0000e-04
+Epoch 39/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 257ms/step - accuracy: 0.9538 - loss: 0.6084  
+Epoch 39: val_accuracy did not improve from 0.81778
+181/181 ━━━━━━━━━━━━━━━━━━━━ 48s 266ms/step - accuracy: 0.9516 - loss: 0.6069 - val_accuracy: 0.8044 - val_loss: 0.8907 - learning_rate: 2.0000e-04
+Epoch 40/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 265ms/step - accuracy: 0.9584 - loss: 0.5915  
+Epoch 40: val_accuracy did not improve from 0.81778
+181/181 ━━━━━━━━━━━━━━━━━━━━ 49s 273ms/step - accuracy: 0.9571 - loss: 0.5973 - val_accuracy: 0.7778 - val_loss: 1.0871 - learning_rate: 2.0000e-04
+Epoch 41/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 263ms/step - accuracy: 0.9611 - loss: 0.5857 
+Epoch 41: val_accuracy did not improve from 0.81778
+181/181 ━━━━━━━━━━━━━━━━━━━━ 49s 271ms/step - accuracy: 0.9623 - loss: 0.5773 - val_accuracy: 0.7556 - val_loss: 0.9884 - learning_rate: 2.0000e-04
+Epoch 42/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 260ms/step - accuracy: 0.9669 - loss: 0.5572  
+Epoch 42: val_accuracy did not improve from 0.81778
+181/181 ━━━━━━━━━━━━━━━━━━━━ 49s 268ms/step - accuracy: 0.9602 - loss: 0.5670 - val_accuracy: 0.7600 - val_loss: 0.9173 - learning_rate: 2.0000e-04
+Epoch 43/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 263ms/step - accuracy: 0.9520 - loss: 0.5905 
+Epoch 43: val_accuracy improved from 0.81778 to 0.84444, saving model to models_v5_incept_ce_plateau224/best_model.keras
+181/181 ━━━━━━━━━━━━━━━━━━━━ 50s 277ms/step - accuracy: 0.9616 - loss: 0.5665 - val_accuracy: 0.8444 - val_loss: 0.8361 - learning_rate: 2.0000e-04
+Epoch 44/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 262ms/step - accuracy: 0.9682 - loss: 0.5473  
+Epoch 44: val_accuracy did not improve from 0.84444
+181/181 ━━━━━━━━━━━━━━━━━━━━ 49s 270ms/step - accuracy: 0.9637 - loss: 0.5523 - val_accuracy: 0.8311 - val_loss: 0.8507 - learning_rate: 2.0000e-04
+Epoch 45/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 258ms/step - accuracy: 0.9496 - loss: 0.5490  
+Epoch 45: val_accuracy did not improve from 0.84444
+181/181 ━━━━━━━━━━━━━━━━━━━━ 48s 267ms/step - accuracy: 0.9557 - loss: 0.5427 - val_accuracy: 0.7644 - val_loss: 0.8934 - learning_rate: 2.0000e-04
+Epoch 46/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 260ms/step - accuracy: 0.9526 - loss: 0.5441  
+Epoch 46: val_accuracy did not improve from 0.84444
+181/181 ━━━━━━━━━━━━━━━━━━━━ 49s 269ms/step - accuracy: 0.9571 - loss: 0.5449 - val_accuracy: 0.7867 - val_loss: 0.8223 - learning_rate: 2.0000e-04
+Epoch 47/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 259ms/step - accuracy: 0.9619 - loss: 0.5416  
+Epoch 47: val_accuracy did not improve from 0.84444
+181/181 ━━━━━━━━━━━━━━━━━━━━ 49s 268ms/step - accuracy: 0.9616 - loss: 0.5345 - val_accuracy: 0.8044 - val_loss: 0.7996 - learning_rate: 2.0000e-04
+Epoch 48/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 257ms/step - accuracy: 0.9701 - loss: 0.5133  
+Epoch 48: val_accuracy did not improve from 0.84444
+181/181 ━━━━━━━━━━━━━━━━━━━━ 49s 266ms/step - accuracy: 0.9671 - loss: 0.5196 - val_accuracy: 0.8089 - val_loss: 0.8926 - learning_rate: 2.0000e-04
+Epoch 49/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 261ms/step - accuracy: 0.9638 - loss: 0.5168  
+Epoch 49: val_accuracy did not improve from 0.84444
+181/181 ━━━━━━━━━━━━━━━━━━━━ 49s 269ms/step - accuracy: 0.9595 - loss: 0.5313 - val_accuracy: 0.8178 - val_loss: 0.8661 - learning_rate: 2.0000e-04
+Epoch 50/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 265ms/step - accuracy: 0.9636 - loss: 0.5285 
+Epoch 50: val_accuracy did not improve from 0.84444
+181/181 ━━━━━━━━━━━━━━━━━━━━ 49s 273ms/step - accuracy: 0.9671 - loss: 0.5171 - val_accuracy: 0.7867 - val_loss: 0.8458 - learning_rate: 2.0000e-04
+Epoch 51/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 258ms/step - accuracy: 0.9703 - loss: 0.5035  
+Epoch 51: val_accuracy did not improve from 0.84444
+181/181 ━━━━━━━━━━━━━━━━━━━━ 48s 266ms/step - accuracy: 0.9699 - loss: 0.5039 - val_accuracy: 0.7156 - val_loss: 1.1061 - learning_rate: 2.0000e-04
+Epoch 52/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 261ms/step - accuracy: 0.9655 - loss: 0.5144  
+Epoch 52: val_accuracy did not improve from 0.84444
+181/181 ━━━━━━━━━━━━━━━━━━━━ 49s 270ms/step - accuracy: 0.9696 - loss: 0.4975 - val_accuracy: 0.8089 - val_loss: 0.8790 - learning_rate: 2.0000e-04
+Epoch 53/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 262ms/step - accuracy: 0.9577 - loss: 0.5161 
+Epoch 53: val_accuracy did not improve from 0.84444
+
+Epoch 53: ReduceLROnPlateau reducing learning rate to 9.999999747378752e-05.
+181/181 ━━━━━━━━━━━━━━━━━━━━ 49s 271ms/step - accuracy: 0.9651 - loss: 0.5051 - val_accuracy: 0.7733 - val_loss: 1.0932 - learning_rate: 2.0000e-04
+Epoch 54/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 262ms/step - accuracy: 0.9697 - loss: 0.4945 
+Epoch 54: val_accuracy did not improve from 0.84444
+181/181 ━━━━━━━━━━━━━━━━━━━━ 49s 270ms/step - accuracy: 0.9740 - loss: 0.4835 - val_accuracy: 0.8222 - val_loss: 0.8084 - learning_rate: 1.0000e-04
+Epoch 55/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 262ms/step - accuracy: 0.9738 - loss: 0.4684  
+Epoch 55: val_accuracy did not improve from 0.84444
+181/181 ━━━━━━━━━━━━━━━━━━━━ 49s 270ms/step - accuracy: 0.9737 - loss: 0.4714 - val_accuracy: 0.8222 - val_loss: 0.8193 - learning_rate: 1.0000e-04
+Epoch 56/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 259ms/step - accuracy: 0.9774 - loss: 0.4678  
+Epoch 56: val_accuracy did not improve from 0.84444
+181/181 ━━━━━━━━━━━━━━━━━━━━ 49s 268ms/step - accuracy: 0.9761 - loss: 0.4653 - val_accuracy: 0.8356 - val_loss: 0.7680 - learning_rate: 1.0000e-04
+Epoch 57/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 260ms/step - accuracy: 0.9818 - loss: 0.4495 
+Epoch 57: val_accuracy did not improve from 0.84444
+181/181 ━━━━━━━━━━━━━━━━━━━━ 49s 268ms/step - accuracy: 0.9803 - loss: 0.4556 - val_accuracy: 0.8000 - val_loss: 0.8336 - learning_rate: 1.0000e-04
+Epoch 58/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 262ms/step - accuracy: 0.9829 - loss: 0.4465 
+Epoch 58: val_accuracy improved from 0.84444 to 0.85333, saving model to models_v5_incept_ce_plateau224/best_model.keras
+181/181 ━━━━━━━━━━━━━━━━━━━━ 50s 274ms/step - accuracy: 0.9817 - loss: 0.4504 - val_accuracy: 0.8533 - val_loss: 0.7772 - learning_rate: 1.0000e-04
+Epoch 59/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 259ms/step - accuracy: 0.9812 - loss: 0.4606  
+Epoch 59: val_accuracy did not improve from 0.85333
+181/181 ━━━━━━━━━━━━━━━━━━━━ 48s 267ms/step - accuracy: 0.9758 - loss: 0.4629 - val_accuracy: 0.8044 - val_loss: 0.8460 - learning_rate: 1.0000e-04
+Epoch 60/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 258ms/step - accuracy: 0.9769 - loss: 0.4512  
+Epoch 60: val_accuracy did not improve from 0.85333
+181/181 ━━━━━━━━━━━━━━━━━━━━ 48s 266ms/step - accuracy: 0.9772 - loss: 0.4519 - val_accuracy: 0.8178 - val_loss: 0.7759 - learning_rate: 1.0000e-04
+Epoch 61/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 263ms/step - accuracy: 0.9856 - loss: 0.4407  
+Epoch 61: val_accuracy did not improve from 0.85333
+181/181 ━━━━━━━━━━━━━━━━━━━━ 49s 271ms/step - accuracy: 0.9837 - loss: 0.4411 - val_accuracy: 0.7778 - val_loss: 0.8685 - learning_rate: 1.0000e-04
+Epoch 62/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 258ms/step - accuracy: 0.9798 - loss: 0.4433  
+Epoch 62: val_accuracy did not improve from 0.85333
+
+Epoch 62: ReduceLROnPlateau reducing learning rate to 4.999999873689376e-05.
+181/181 ━━━━━━━━━━━━━━━━━━━━ 48s 266ms/step - accuracy: 0.9785 - loss: 0.4491 - val_accuracy: 0.8000 - val_loss: 0.8627 - learning_rate: 1.0000e-04
+Epoch 63/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 260ms/step - accuracy: 0.9873 - loss: 0.4300  
+Epoch 63: val_accuracy did not improve from 0.85333
+181/181 ━━━━━━━━━━━━━━━━━━━━ 49s 268ms/step - accuracy: 0.9862 - loss: 0.4326 - val_accuracy: 0.8178 - val_loss: 0.8032 - learning_rate: 5.0000e-05
+Epoch 64/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 261ms/step - accuracy: 0.9867 - loss: 0.4322  
+Epoch 64: val_accuracy did not improve from 0.85333
+181/181 ━━━━━━━━━━━━━━━━━━━━ 49s 269ms/step - accuracy: 0.9869 - loss: 0.4296 - val_accuracy: 0.8178 - val_loss: 0.8132 - learning_rate: 5.0000e-05
+Epoch 65/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 258ms/step - accuracy: 0.9819 - loss: 0.4304  
+Epoch 65: val_accuracy did not improve from 0.85333
+181/181 ━━━━━━━━━━━━━━━━━━━━ 48s 267ms/step - accuracy: 0.9820 - loss: 0.4328 - val_accuracy: 0.8089 - val_loss: 0.8306 - learning_rate: 5.0000e-05
+Epoch 66/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 262ms/step - accuracy: 0.9857 - loss: 0.4242 
+Epoch 66: val_accuracy did not improve from 0.85333
+181/181 ━━━━━━━━━━━━━━━━━━━━ 49s 270ms/step - accuracy: 0.9848 - loss: 0.4289 - val_accuracy: 0.7956 - val_loss: 0.8428 - learning_rate: 5.0000e-05
+Epoch 67/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 260ms/step - accuracy: 0.9872 - loss: 0.4197  
+Epoch 67: val_accuracy did not improve from 0.85333
+181/181 ━━━━━━━━━━━━━━━━━━━━ 49s 268ms/step - accuracy: 0.9893 - loss: 0.4178 - val_accuracy: 0.8089 - val_loss: 0.8295 - learning_rate: 5.0000e-05
+Epoch 68/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 264ms/step - accuracy: 0.9869 - loss: 0.4163 
+Epoch 68: val_accuracy did not improve from 0.85333
+
+Epoch 68: ReduceLROnPlateau reducing learning rate to 2.499999936844688e-05.
+181/181 ━━━━━━━━━━━━━━━━━━━━ 49s 272ms/step - accuracy: 0.9855 - loss: 0.4196 - val_accuracy: 0.7956 - val_loss: 0.8764 - learning_rate: 5.0000e-05
+Epoch 69/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 262ms/step - accuracy: 0.9835 - loss: 0.4282 
+Epoch 69: val_accuracy did not improve from 0.85333
+181/181 ━━━━━━━━━━━━━━━━━━━━ 49s 271ms/step - accuracy: 0.9872 - loss: 0.4219 - val_accuracy: 0.8311 - val_loss: 0.8043 - learning_rate: 2.5000e-05
+Epoch 70/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 260ms/step - accuracy: 0.9894 - loss: 0.4106 
+Epoch 70: val_accuracy did not improve from 0.85333
+181/181 ━━━━━━━━━━━━━━━━━━━━ 49s 269ms/step - accuracy: 0.9907 - loss: 0.4095 - val_accuracy: 0.8044 - val_loss: 0.8625 - learning_rate: 2.5000e-05
+Epoch 71/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 260ms/step - accuracy: 0.9928 - loss: 0.4070  
+Epoch 71: val_accuracy did not improve from 0.85333
+181/181 ━━━━━━━━━━━━━━━━━━━━ 49s 268ms/step - accuracy: 0.9924 - loss: 0.4061 - val_accuracy: 0.8000 - val_loss: 0.8455 - learning_rate: 2.5000e-05
+Epoch 72/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 260ms/step - accuracy: 0.9927 - loss: 0.4058 
+Epoch 72: val_accuracy did not improve from 0.85333
+181/181 ━━━━━━━━━━━━━━━━━━━━ 49s 269ms/step - accuracy: 0.9924 - loss: 0.4065 - val_accuracy: 0.8044 - val_loss: 0.8139 - learning_rate: 2.5000e-05
+Epoch 73/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 259ms/step - accuracy: 0.9893 - loss: 0.4090 
+Epoch 73: val_accuracy did not improve from 0.85333
+181/181 ━━━━━━━━━━━━━━━━━━━━ 48s 268ms/step - accuracy: 0.9893 - loss: 0.4089 - val_accuracy: 0.8178 - val_loss: 0.8278 - learning_rate: 2.5000e-05
+Epoch 74/90
+181/181 ━━━━━━━━━━━━━━━━━━━━ 0s 260ms/step - accuracy: 0.9879 - loss: 0.4167 
+Epoch 74: val_accuracy did not improve from 0.85333
+
+Epoch 74: ReduceLROnPlateau reducing learning rate to 1.249999968422344e-05.
+181/181 ━━━━━━━━━━━━━━━━━━━━ 49s 269ms/step - accuracy: 0.9900 - loss: 0.4084 - val_accuracy: 0.7867 - val_loss: 0.8488 - learning_rate: 2.5000e-05
+Epoch 74: early stopping
+Restoring model weights from the end of the best epoch: 56.
+Final model saved to models_v5_incept_ce_plateau224/final_model.keras
+Training history saved to models_v5_incept_ce_plateau224/training_history.json
+Class names saved to models_v5_incept_ce_plateau224/classes.txt
+Training completed!

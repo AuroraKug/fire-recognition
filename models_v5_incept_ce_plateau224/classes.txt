@@ -1,0 +1,3 @@
+fire
+no_fire
+start_fire
