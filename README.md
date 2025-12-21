@@ -66,7 +66,3 @@
     --classes_file models_v5_incept_ce_plateau224/classes.txt
   ```
 - 输出仅含 `ID,Label` 列，按文件名排序，适配比赛提交格式。
-
-## 备注与改进方向
-- 若显存允许，可尝试更大批次并线性放大学习率；或轻度 MixUp/CutMix 做额外模型并行系数投票融合。
-- 进一步可调：提升/降低 L2、尝试 cosine+warmup、或对 “start_fire” 类做轻度过采样以平衡召回。

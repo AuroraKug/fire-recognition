@@ -1,14 +1,3 @@
-#!/usr/bin/env python3
-"""
-Fire Detection Model Training Script
-
-This script trains a fire detection CNN model from scratch.
-It supports stratified splitting, data augmentation, and saves the trained model.
-
-Usage:
-    python train.py --train_root datasets/train --val_root datasets/val --output_dir models/
-"""
-
 import argparse
 import os
 import sys
@@ -36,20 +25,18 @@ from tensorflow.keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLRO
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras import regularizers, losses
 
-# Add the project root to the path to import dataset utilities
+# 将项目根目录添加到路径中，以便导入 dataset 的 utilities
 sys.path.append(str(Path(__file__).parent))
-from dataset import build_image_index, stratified_split, make_tf_dataset
+from dataset import build_image_index, stratified_split
 
-# Constants
-IMG_HEIGHT = 224  # defaults; can be overridden via CLI
+IMG_HEIGHT = 224
 IMG_WIDTH = 224
 BATCH_SIZE = 16
 EPOCHS = 90
 LEARNING_RATE = 3e-4
 
+# 深度可分离残差块，可在不增加大量参数的情况下提高模型容量
 def residual_block(x, filters, stride=1, dropout_rate=0.0, l2_weight=1e-4):
-    """Depthwise-separable residual block to improve capacity without heavy params."""
-
     shortcut = x
     if stride != 1 or x.shape[-1] != filters:
         shortcut = Conv2D(
@@ -196,8 +183,6 @@ def create_inception_like(num_classes, l2_weight=5e-5, dropout_head=0.3):
 
 
 def create_residual_model(num_classes, l2_weight=5e-5):
-    """Create a regularised CNN from scratch (no pre-trained backbone)."""
-
     inputs = Input(shape=(IMG_HEIGHT, IMG_WIDTH, 3))
 
     x = Conv2D(
@@ -248,13 +233,12 @@ def create_residual_model(num_classes, l2_weight=5e-5):
 
     model = Model(inputs=inputs, outputs=outputs)
 
-    # For compatibility with prior return signature
     return model, model
 
 
 @tf.keras.utils.register_keras_serializable(package="Custom")
 class WarmupCosineSchedule(tf.keras.optimizers.schedules.LearningRateSchedule):
-    """Cosine decay with linear warmup."""
+    """Cosine decay + linear warmup."""
 
     def __init__(self, base_lr, total_steps, warmup_steps):
         super().__init__()
@@ -281,7 +265,6 @@ class WarmupCosineSchedule(tf.keras.optimizers.schedules.LearningRateSchedule):
         }
 
 def apply_mixup(x_batch, y_batch, alpha=0.2, prob=0.5):
-    """Apply MixUp augmentation on a batch with given probability."""
     if np.random.rand() > prob:
         return x_batch, y_batch
 
@@ -294,7 +277,6 @@ def apply_mixup(x_batch, y_batch, alpha=0.2, prob=0.5):
 
 
 def apply_cutmix(x_batch, y_batch, alpha=0.6, prob=0.3):
-    """Apply CutMix augmentation on a batch with given probability."""
     if np.random.rand() > prob:
         return x_batch, y_batch
 
@@ -324,25 +306,20 @@ def apply_cutmix(x_batch, y_batch, alpha=0.6, prob=0.3):
 
 
 def create_data_generators(train_df, val_df, class_names, batch_size, use_mixup=True, use_cutmix=False):
-    """Create data generators with augmentation for training and validation.
-
-    Returns generators plus their step counts for correct progress display.
-    If mixup is disabled, return the Keras iterator directly so class_weight is supported.
-    """
     train_datagen = ImageDataGenerator(
-        rescale=1./255,
-        rotation_range=25,
-        width_shift_range=0.2,
-        height_shift_range=0.2,
-        shear_range=0.2,
-        zoom_range=0.25,
-        brightness_range=(0.75, 1.25),
-        channel_shift_range=25.0,
-        horizontal_flip=True,
-        fill_mode='nearest'
+        rescale=1./255, # 将像素值缩放到 [0, 1]
+        rotation_range=25,  # 随机旋转图像
+        width_shift_range=0.2,  # 随机水平平移
+        height_shift_range=0.2, # 随机垂直平移
+        shear_range=0.2,    # 随机剪切
+        zoom_range=0.25,    # 随机缩放
+        brightness_range=(0.75, 1.25),  # 随机调整亮度
+        channel_shift_range=25.0,  # 随机通道偏移
+        horizontal_flip=True,  # 随机水平翻转
+        fill_mode='nearest'  # 填充空白区域
     )
 
-    val_datagen = ImageDataGenerator(rescale=1./255)
+    val_datagen = ImageDataGenerator(rescale=1./255)  # 归一化
 
     base_train_gen = train_datagen.flow_from_dataframe(
         dataframe=train_df,
@@ -386,7 +363,7 @@ def create_data_generators(train_df, val_df, class_names, batch_size, use_mixup=
 
 
 def compute_class_weights(train_df, class_names):
-    """Return sqrt inverse-frequency class weights to soften imbalance corrections."""
+    """计算类别权重。使用平方根减缓权重的极端变化"""
 
     counts = train_df['class'].value_counts()
     max_count = counts.max()
@@ -414,11 +391,9 @@ def main():
 
     args = parser.parse_args()
 
-    # Create output directory
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    # Override global image size from CLI
     global IMG_HEIGHT, IMG_WIDTH
     IMG_HEIGHT = args.img_size
     IMG_WIDTH = args.img_size
@@ -448,14 +423,14 @@ def main():
     print(f"Training samples: {len(train_files_df)}")
     print(f"Validation samples: {len(val_files_df)}")
 
-    # Rename columns for compatibility with ImageDataGenerator
+    # 重命名列名以兼容 ImageDataGenerator
     train_files_df = train_files_df.rename(columns={'path': 'filepath', 'label_name': 'class'})
     val_files_df = val_files_df.rename(columns={'path': 'filepath', 'label_name': 'class'})
 
     class_weights = compute_class_weights(train_files_df, class_names)
     print(f"Class weights: {class_weights}")
 
-    # Create data generators
+    # create data generators
     use_mixup = not args.no_mixup
     use_cutmix = args.use_cutmix
     train_generator, val_generator, train_steps, val_steps = create_data_generators(
@@ -473,7 +448,6 @@ def main():
     else:
         class_weight_arg = class_weights
 
-    # Create model
     print("Creating model...")
     if args.model_type == 'inception':
         model, base_model = create_inception_like(num_classes, l2_weight=args.l2_weight)

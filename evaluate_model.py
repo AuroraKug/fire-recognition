@@ -23,8 +23,8 @@ import tensorflow as tf
 from PIL import Image
 
 # Constants
-IMG_HEIGHT = 299  # InceptionV3 input size
-IMG_WIDTH = 299
+IMG_HEIGHT = 224  # InceptionV3 input size
+IMG_WIDTH = 224
 
 def load_model_and_classes(model_path, classes_path=None):
     """Load the trained model and class names."""

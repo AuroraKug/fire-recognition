@@ -1,37 +1,3 @@
-"""Utilities for scanning fire-detection datasets and preparing training data.
-
-This module centralises the dataset handling so we can effortlessly mix the
-three official training archives, apply deterministic splits, and build Tensor
-Flow ``tf.data.Dataset`` objects for training and inference. It is designed to
-work with the directory layout::::
-
-datasets/
-    train/
-        FIRE_DATABASE_1/
-        FIRE_DATABASE_2/
-        FIRE_DATABASE_3/
-    val/
-    test/
-
-Each database is expected to contain class sub-directories (``fire`` or ``Feu``,
-``no_fire`` or ``Pas de Feu``...). The helper functions normalise these names so
-that the rest of the pipeline can operate with the canonical label ids:
-
-    0 -> fire
-    1 -> no fire
-    2 -> start fire
-
-Example
--------
->>> from dataset import build_image_index, stratified_split, make_tf_dataset
->>> df = build_image_index(["datasets/train/FIRE_DATABASE_1"], split="train")
->>> train_df, val_df = stratified_split(df, val_fraction=0.1, seed=42)
->>> train_ds = make_tf_dataset(train_df, batch_size=32, image_size=(224, 224))
-
-The resulting dataframe can be saved to CSV for auditing or fed directly into
-model training utilities.
-"""
-
 from __future__ import annotations
 
 import math
@@ -45,7 +11,7 @@ import pandas as pd
 import tensorflow as tf
 
 
-# Canonical label mapping ---------------------------------------------------
+# Canonical label mapping
 
 CANONICAL_LABELS = ["fire", "no_fire", "start_fire"]
 CANONICAL_TO_ID = {name: idx for idx, name in enumerate(CANONICAL_LABELS)}
